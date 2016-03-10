@@ -5,4 +5,9 @@ socketServer/.gradle/
 socketServer/.project
 socketServer/.settings/
 socketServer/bin/
-
+app/.classpath
+app/.gradle/
+app/.project
+app/.settings/
+app/bin/
+app/.DS_Store
