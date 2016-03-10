@@ -1,0 +1,8 @@
+.metadata/
+.recommenders/
+socketServer/.classpath
+socketServer/.gradle/
+socketServer/.project
+socketServer/.settings/
+socketServer/bin/
+
