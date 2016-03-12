@@ -1,4 +1,4 @@
-package uri.genchi.websocket;
+package url.genchi.websocket;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -9,14 +9,15 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
-    @Override
-    public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/");
-        config.setApplicationDestinationPrefixes("/");
-    }
 
-    //@Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/user").withSockJS();
-    }
+	@Override
+	public void configureMessageBroker(MessageBrokerRegistry config) {
+		config.enableSimpleBroker("/sender");
+		config.setApplicationDestinationPrefixes("/receiver");
+	}
+
+	public void registerStompEndpoints(StompEndpointRegistry registry) {
+		registry.addEndpoint("/user").withSockJS();
+	}
+
 }

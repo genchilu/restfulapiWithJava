@@ -1,21 +1,48 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title></title>
-        <script type="text/javascript" src="js/jquery/jquery-2.2.1.min.js" ></script>
-        <script src="js/user.js"></script>
-    </head>
-    <body>
-        <form id="sentToBack">
-            <p>username<p>
-            <input type="text" id="username"/>
-            <p>address</p>
-            <input type="text" id="address"/>
-            <p>age</p>
-            <input type="text" id="age"/>
-            <p>
-            <input type="button"  value="submit" onClick="getuser()"/>
-        </form>
-        <p id="output">
-    </body>
+<head>
+    <title>Hello WebSocket</title>
+    <script src="js/sockjs/sockjs-0.3.min.js"></script>
+    <script src="js/stomp/stomp-2.3.3.min.js"></script>
+    <script type="text/javascript">
+        var stompClient = null;
+
+        function connect() {
+            var socket = new SockJS('/user');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function(frame) {
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/sender/greetings', function(greeting){
+                    showGreeting(JSON.parse(greeting.body).content);
+                });
+            });
+        }
+
+        function sendName() {
+            var username = document.getElementById('username').value;
+            var address = document.getElementById('address').value;
+            var age = document.getElementById('age').value;
+            console.log(username)
+            stompClient.send("/receiver/user", {}, JSON.stringify({ 'username': username, 'address': address, 'age': age }));
+        }
+
+        function showGreeting(message) {
+            var response = document.getElementById('response');
+            var p = document.createElement('p');
+            p.style.wordWrap = 'break-word';
+            p.appendChild(document.createTextNode(message));
+            response.appendChild(p);
+        }
+    </script>
+</head>
+<body onload="connect()">
+    <div id="conversationDiv">
+        <p><label>What is your name?</label><input type="text" value="genchi" id="username" /></p>
+        <p><label>What is your address?</label><input type="text" value="tw" id="address" /></p>
+        <p><label>What is your age?</label><input type="text" value="32" id="age" /></p>
+        <p><button id="sendName" onclick="sendName();">Send</button></p>
+        <p id="response"></p>
+    </div>
+</div>
+</body>
 </html>
