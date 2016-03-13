@@ -22,8 +22,22 @@ import com.google.common.base.Stopwatch;
 public class UserRestController {
     @Autowired private SocketCli socketcli;
 
+    private static JSONObject invalidJson = new JSONObject("{\"status\": \"failed\", \"message\": \"invalid input\"}");
+
+    //only word and digit is a valid input
+    private static void checkInput(String in) throws Exception {
+        if(!in.matches("^(?i)[a-z0-9]+$")) {
+            throw new Exception("invalid input");
+        }
+    }
+
     @RequestMapping(value="/{user}", method = RequestMethod.GET)
     public String getUser(@PathVariable("user") String username) throws InterruptedException, ExecutionException, IOException {
+        try {
+            checkInput(username);
+        } catch (Exception e) {
+            return invalidJson.toString();
+        }
         Stopwatch stopwatch = Stopwatch.createStarted();
         Future<String> countryResult = socketcli.sendCmdAsync("GET", username, "country", "");
         Future<String> cityResult = socketcli.sendCmdAsync("GET", username, "city", "");
@@ -39,6 +53,13 @@ public class UserRestController {
 
     @RequestMapping(value="/{user}", method = RequestMethod.POST)
     public String postUser(@PathVariable("user") String username, @RequestParam("country") String country, @RequestParam("city") String city) throws InterruptedException, ExecutionException, IOException {
+        try {
+            checkInput(username);
+            checkInput(country);
+            checkInput(city);
+        } catch (Exception e) {
+            return invalidJson.toString();
+        }
         Stopwatch stopwatch = Stopwatch.createStarted();
         Future<String> addCountryResult = socketcli.sendCmdAsync("POST", username, "country", country);
         Future<String> addCityResult = socketcli.sendCmdAsync("POST", username, "city", city);
@@ -57,6 +78,13 @@ public class UserRestController {
 
     @RequestMapping(value="/{user}", method = RequestMethod.PUT)
     public String putUser(@PathVariable("user") String username, String country, String city) throws InterruptedException, ExecutionException, IOException {
+        try {
+            checkInput(username);
+            checkInput(country);
+            checkInput(city);
+        } catch (Exception e) {
+            return invalidJson.toString();
+        }
         Stopwatch stopwatch = Stopwatch.createStarted();
         Future<String> putCountryResult = socketcli.sendCmdAsync("PUT", username, "country", country);
         Future<String> putCityResult = socketcli.sendCmdAsync("PUT", username, "city", city);
@@ -74,7 +102,12 @@ public class UserRestController {
     }
 
     @RequestMapping(value="/{user}", method = RequestMethod.DELETE)
-    public String deleteUser(@PathVariable("user") String username, String country, String city) throws InterruptedException, ExecutionException, IOException {
+    public String deleteUser(@PathVariable("user") String username) throws InterruptedException, ExecutionException, IOException {
+        try {
+            checkInput(username);
+        } catch (Exception e) {
+            return invalidJson.toString();
+        }
         Stopwatch stopwatch = Stopwatch.createStarted();
         Future<String> delCountryResult = socketcli.sendCmdAsync("DELETE", username, "country", "");
         Future<String> delCityResult = socketcli.sendCmdAsync("DELETE", username, "city", "");
