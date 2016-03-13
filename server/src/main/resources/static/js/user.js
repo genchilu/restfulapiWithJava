@@ -16,6 +16,7 @@
     var city = $('#city').val()
     $.ajax({
         url: "user/" + username,
+        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
         type:"POST",
         data: "country=" + counrty + "&city=" + city,
         dataType:'json',
@@ -27,10 +28,11 @@
 
  var putUser=function(){
     var username = $('#username').val()
-    var counrty = $('#country').val()
-    var city = $('#city').val()
+    var counrty = $('#country').val() || ""
+    var city = $('#city').val() || ""
     $.ajax({
         url: "user/" + username,
+        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
         type:"PUT",
         data: "country=" + counrty + "&city=" + city,
         dataType:'json',

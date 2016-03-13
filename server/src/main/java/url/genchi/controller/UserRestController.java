@@ -26,7 +26,7 @@ public class UserRestController {
 
     //only word and digit is a valid input
     private static void checkInput(String in) throws Exception {
-        if(!in.matches("^(?i)[a-z0-9]+$")) {
+        if(!in.matches("^(?i)[a-z0-9]*$")) {
             throw new Exception("invalid input");
         }
     }
