@@ -14,10 +14,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 @SpringBootApplication
 @ComponentScan( basePackages = {"url.genchi.controller", "url.genchi.socketcli"} )
-public class App implements AsyncConfigurer {
+public class Server implements AsyncConfigurer {
 
     public static void main(String[] args) {
-        SpringApplication.run(App.class, args);
+        SpringApplication.run(Server.class, args);
     }
 
     public Executor getAsyncExecutor() {

@@ -3,33 +3,39 @@
     $.ajax({
         url: "user/" + username,
         type:"GET",
-        dataType:'text',
+        dataType:'json',
         success: function(msg){
-            $('#output').append(msg)
+            $('#output').append(" <p>" + JSON.stringify(msg) + "</p> ")
         },
     });
 }
 
  var postUser=function(){
     var username = $('#username').val()
+    var counrty = $('#country').val()
+    var city = $('#city').val()
     $.ajax({
         url: "user/" + username,
         type:"POST",
-        dataType:'text',
+        data: "country=" + counrty + "&city=" + city,
+        dataType:'json',
         success: function(msg){
-            $('#output').append(msg)
+            $('#output').append(" <p>" + JSON.stringify(msg) + "</p> ")
         },
     });
 }
 
  var putUser=function(){
     var username = $('#username').val()
+    var counrty = $('#country').val()
+    var city = $('#city').val()
     $.ajax({
         url: "user/" + username,
         type:"PUT",
-        dataType:'text',
+        data: "country=" + counrty + "&city=" + city,
+        dataType:'json',
         success: function(msg){
-            $('#output').append(msg)
+            $('#output').append(" <p>" + JSON.stringify(msg) + "</p> ")
         },
     });
 }
@@ -39,9 +45,9 @@
     $.ajax({
         url: "user/" + username,
         type:"DELETE",
-        dataType:'text',
+        dataType:'json',
         success: function(msg){
-            $('#output').append(msg)
+            $('#output').append(" <p>" + JSON.stringify(msg) + "</p> ")
         },
     });
 }

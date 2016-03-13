@@ -11,11 +11,12 @@ import java.util.concurrent.Executors;
 
 import org.json.JSONObject;
 
-public class Server {
+public class App {
 
     public static final int LISTEN_PORT = 5987;
-    private static enum CMD {GET, POST, DELETE, UPDATE}
+    private static enum CMD {GET, POST, DELETE, PUT}
     private static ConcurrentHashMap<String, JSONObject> userMap = new ConcurrentHashMap<String, JSONObject>();
+
     public void listenRequest() {
         ServerSocket serverSocket = null;
         ExecutorService threadExecutor = Executors.newCachedThreadPool();
@@ -42,9 +43,6 @@ public class Server {
         }
     }
 
-    /**
-     * process request
-     */
     private static class RequestThread implements Runnable {
         private Socket clientSocket;
 
@@ -52,54 +50,75 @@ public class Server {
             this.clientSocket = clientSocket;
         }
 
-        static private JSONObject genReturnJson(String status, String msg) {
-            JSONObject errJson = new JSONObject();
-            errJson.put("status", status);
-            if(!msg.isEmpty()){
-                errJson.put("msg", msg);
-            }
-            return errJson;
-        }
-
-        static private String getUserProfileJsonStr(String username) {
-            if(userMap.get(username) != null) {
-                return userMap.get(username).toString();
+        /**
+         * @param username
+         * @param field
+         * @return value for a field, or "" while there is no value in a field in a user
+         */
+        static private String getUserFieldData(String username, String field) {
+            if(userMap.get(username) != null && userMap.get(username).has(field)) {
+                return userMap.get(username).getString(field);
             } else {
-                return genReturnJson("error", "no user exist").toString();
+                return "";
             }
         }
 
-        static private String addUserProfile(String username, JSONObject userProfile) {
+        /**
+         * @param username
+         * @param field
+         * @param value
+         * @return "SUCESSED", or "FAILED" while there is already a value in a field in a user or input value is EMPTY
+         */
+        static private String addUserFieldData(String username, String field, String value) {
             if(userMap.get(username) != null) {
-                return genReturnJson("error", "user already exist").toString();
-            } else {
-                userMap.put(username, userProfile);
-                return genReturnJson("successed", "").toString();
-            }
-        }
-
-        static private String deleteUserProfile(String username) {
-            if(userMap.get(username) != null) {
-                userMap.remove(username);
-                return genReturnJson("successed", "").toString();
-            } else {
-                return genReturnJson("error", "no user exist").toString();
-            }
-        }
-
-        static private String updateUserProfile(String username, JSONObject newUserProfile) {
-            if(userMap.get(username) != null) {
-                JSONObject oriUserProfile = userMap.get(username);
-                if(newUserProfile.has("address")) {
-                    oriUserProfile.put("address", newUserProfile.getString("address"));
+                if(userMap.get(username).has(field)) {
+                    return "FAILED";
+                } else {
+                    if(!value.isEmpty()) {
+                        userMap.get(username).put(field, value);
+                        return "SUCCESSED";
+                    } else {
+                        return "FAILED";
+                    }
                 }
-                if(newUserProfile.has("age")) {
-                    oriUserProfile.put("age", newUserProfile.getInt("age"));
-                }
-                userMap.put(username, oriUserProfile);
-                return genReturnJson("successed", "").toString();
             } else {
-                return genReturnJson("error", "no user exist").toString();
+                if(!value.isEmpty()) {
+                    JSONObject userdata = new JSONObject();
+                    userdata.put(field, value);
+                    userMap.put(username, userdata);
+                    return "SUCCESSED";
+                } else {
+                    return "FAILED";
+                }
+            }
+        }
+
+        /**
+         * @param username
+         * @param field
+         * @return "SUCESSED", or "FAILED" while there is no user or input value is EMPTY
+         */
+        static private String deleteUserFieldData(String username, String field) {
+            if(userMap.get(username) != null && userMap.get(username).has(field)) {
+                userMap.get(username).remove(field);
+                return "SUCCESSED";
+            } else {
+                return "FAILED";
+            }
+        }
+
+        /**
+         * @param username
+         * @param field
+         * @param value
+         * @return "SUCESSED", or "FAILED" while there is no user input value is EMPTY
+         */
+        static private String updateUserFieldData(String username, String field, String value) {
+            if(userMap.get(username) != null && !value.isEmpty()) {
+                userMap.get(username).put(field, value);
+                return "SUCCESSED";
+            } else {
+                return "FAILED";
             }
         }
 
@@ -110,29 +129,38 @@ public class Server {
             CMD cmd;
             String response = "";
             String username;
+            String field;
+            String value;
             try {
                 input = new DataInputStream( this.clientSocket.getInputStream());
                 String inJsonStr = input.readUTF();
+                System.out.println(inJsonStr);
                 JSONObject inJson = new JSONObject(inJsonStr);
                 cmd = CMD.valueOf(inJson.getString("cmd"));
                 username = inJson.getString("username");
+                field = inJson.getString("field");
+                value = inJson.getString("value");
                 switch (cmd) {
                 case GET:
-                    response = getUserProfileJsonStr(username);
+                    response = getUserFieldData(username, field);
                     break;
                 case POST:
-                    response = addUserProfile(username, inJson.getJSONObject("profile"));
+                    response = addUserFieldData(username, field, value);
                     break;
                 case DELETE:
-                    response = deleteUserProfile(username);
+                    response = deleteUserFieldData(username, field);
+                    if(userMap.get(username) != null && !userMap.get(username).has("country") && !userMap.get(username).has("city")) {
+                        userMap.remove(username);
+                    }
                     break;
-                case UPDATE:
-                    response = updateUserProfile(username, inJson.getJSONObject("profile"));
+                case PUT:
+                    response = updateUserFieldData(username, field, value);
                     break;
                 default:
-                    response = getUserProfileJsonStr(username);
+                    response = getUserFieldData(username, field);
                     break;
                 }
+                System.out.println(response);
                 output = new DataOutputStream( this.clientSocket.getOutputStream());
                 output.writeUTF(response);
                 output.flush();
@@ -156,9 +184,9 @@ public class Server {
         }
     }
 
-    public static void main( String[] args )
+    public static void main( String[] args ) throws Throwable
     {
-        Server server = new Server();
+        App server = new App();
         server.listenRequest();
     }
 }
