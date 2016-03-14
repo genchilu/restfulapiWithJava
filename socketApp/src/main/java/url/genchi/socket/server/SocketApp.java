@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 
 import org.json.JSONObject;
 
-public class App {
+public class SocketApp {
 
     public static final int LISTEN_PORT = 5987;
     private static enum CMD {GET, POST, DELETE, PUT}
@@ -160,7 +160,7 @@ public class App {
                     break;
                 }
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(60000);
                 } catch (InterruptedException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -191,7 +191,7 @@ public class App {
 
     public static void main( String[] args ) throws Throwable
     {
-        App server = new App();
+        SocketApp server = new SocketApp();
         server.listenRequest();
     }
 }
