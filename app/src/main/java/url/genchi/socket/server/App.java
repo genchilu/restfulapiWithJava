@@ -134,7 +134,6 @@ public class App {
             try {
                 input = new DataInputStream( this.clientSocket.getInputStream());
                 String inJsonStr = input.readUTF();
-                System.out.println(inJsonStr);
                 JSONObject inJson = new JSONObject(inJsonStr);
                 cmd = CMD.valueOf(inJson.getString("cmd"));
                 username = inJson.getString("username");
@@ -160,9 +159,15 @@ public class App {
                     response = getUserFieldData(username, field);
                     break;
                 }
-                System.out.println(response);
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 output = new DataOutputStream( this.clientSocket.getOutputStream());
                 output.writeUTF(response);
+                System.out.printf("connection from %s finish!\n", clientSocket.getRemoteSocketAddress());
                 output.flush();
             } catch ( IOException e ) {
                 e.printStackTrace();

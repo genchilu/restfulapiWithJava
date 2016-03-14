@@ -2,11 +2,11 @@ package url.genchi.controller;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -15,12 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import url.genchi.controller.socketcli.SocketCli;
 
-import com.google.common.base.Stopwatch;
-
 @RestController
 @RequestMapping("/user")
 public class UserRestController {
-    @Autowired private SocketCli socketcli;
+    private static ExecutorService executor = Executors.newFixedThreadPool(10);
 
     private static JSONObject invalidJson = new JSONObject("{\"status\": \"failed\", \"message\": \"invalid input\"}");
 
@@ -38,12 +36,10 @@ public class UserRestController {
         } catch (Exception e) {
             return invalidJson.toString();
         }
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        Future<String> countryResult = socketcli.sendCmdAsync("GET", username, "country", "");
-        Future<String> cityResult = socketcli.sendCmdAsync("GET", username, "city", "");
+        Future<String> countryResult = executor.submit(new SocketCli("GET", username, "country", ""));
+        Future<String> cityResult = executor.submit(new SocketCli("GET", username, "city", ""));
         String country = countryResult.get();
         String city = cityResult.get();
-        stopwatch.elapsed(TimeUnit.MILLISECONDS);
         JSONObject userdata = new JSONObject();
         userdata.put("username", username);
         userdata.put("country", country);
@@ -60,12 +56,10 @@ public class UserRestController {
         } catch (Exception e) {
             return invalidJson.toString();
         }
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        Future<String> addCountryResult = socketcli.sendCmdAsync("POST", username, "country", country);
-        Future<String> addCityResult = socketcli.sendCmdAsync("POST", username, "city", city);
+        Future<String> addCountryResult = executor.submit(new SocketCli("POST", username, "country", country));
+        Future<String> addCityResult = executor.submit(new SocketCli("POST", username, "city", city));
         String addCountry = addCountryResult.get();
         String addCity = addCityResult.get();
-        stopwatch.elapsed(TimeUnit.MILLISECONDS);
         JSONObject mesg = new JSONObject();
         mesg.put("oper", "POST");
         if(addCountry.equals("SUCCESSED") || addCity.equals("SUCCESSED")) {
@@ -85,12 +79,10 @@ public class UserRestController {
         } catch (Exception e) {
             return invalidJson.toString();
         }
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        Future<String> putCountryResult = socketcli.sendCmdAsync("PUT", username, "country", country);
-        Future<String> putCityResult = socketcli.sendCmdAsync("PUT", username, "city", city);
+        Future<String> putCountryResult = executor.submit(new SocketCli("PUT", username, "country", country));
+        Future<String> putCityResult = executor.submit(new SocketCli("PUT", username, "city", city));
         String putCountry = putCountryResult.get();
         String putCity = putCityResult.get();
-        stopwatch.elapsed(TimeUnit.MILLISECONDS);
         JSONObject mesg = new JSONObject();
         mesg.put("oper", "PUT");
         if(putCountry.equals("SUCCESSED") || putCity.equals("SUCCESSED")) {
@@ -108,12 +100,10 @@ public class UserRestController {
         } catch (Exception e) {
             return invalidJson.toString();
         }
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        Future<String> delCountryResult = socketcli.sendCmdAsync("DELETE", username, "country", "");
-        Future<String> delCityResult = socketcli.sendCmdAsync("DELETE", username, "city", "");
+        Future<String> delCountryResult = executor.submit(new SocketCli("DELETE", username, "country", ""));
+        Future<String> delCityResult = executor.submit(new SocketCli("GET", username, "city", ""));
         String delCountry = delCountryResult.get();
         String delCity = delCityResult.get();
-        stopwatch.elapsed(TimeUnit.MILLISECONDS);
         JSONObject mesg = new JSONObject();
         mesg.put("oper", "DELETE");
         if(delCountry.equals("SUCCESSED") || delCity.equals("SUCCESSED")) {

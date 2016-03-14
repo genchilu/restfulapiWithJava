@@ -4,22 +4,22 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Callable;
 
 import org.json.JSONObject;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.stereotype.Component;
 
-import com.google.common.base.Stopwatch;
-
-@Component
-public class SocketCli {
-
-    @Async
-    public Future<String> sendCmdAsync(String cmd, String username, String field, String value) throws InterruptedException, IOException {
-        Stopwatch stopwatch = Stopwatch.createStarted();
+public class SocketCli implements Callable<String> {
+    private String cmd;
+    private String username;
+    private String field;
+    private String value;
+    public SocketCli(String cmd, String username, String field, String value) {
+        this.cmd = cmd;
+        this.field = field;
+        this.username = username;
+        this.value = value;
+    }
+    public String call() throws Exception {
         Socket socket = null;
         DataInputStream input = null;
         DataOutputStream output = null;
@@ -50,8 +50,6 @@ public class SocketCli {
                 output.close();
             }
         }
-        stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        return new AsyncResult<String>(response);
+        return response;
     }
-
 }
