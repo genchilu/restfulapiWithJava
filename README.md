@@ -1,5 +1,5 @@
 用 spring-boot 實作的 REST API  
-web server 使用非同步呼叫對後台的 socket server 溝通  
+web server 使用非同步呼叫與後台的 socket server 溝通  
 
 啟動 web
 ```
